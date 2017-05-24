@@ -92,7 +92,6 @@ void MobilityBase::initializePosition()
     setInitialPosition();
     checkPosition();
     emitMobilityStateChangedSignal();
-    updateVisualRepresentation();
 }
 
 void MobilityBase::setInitialPosition()
@@ -153,7 +152,7 @@ void MobilityBase::handleMessage(cMessage *message)
         throw cRuntimeError("Mobility modules can only receive self messages");
 }
 
-void MobilityBase::updateVisualRepresentation()
+void MobilityBase::refreshDisplay() const
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
 #ifdef WITH_VISUALIZERS
