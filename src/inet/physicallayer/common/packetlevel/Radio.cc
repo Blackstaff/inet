@@ -320,6 +320,8 @@ bool Radio::handleNodeShutdown(IDoneCallback *doneCallback)
     cancelEvent(switchTimer);
     if (transmissionTimer->isScheduled())
         abortTransmission();
+    if (receptionTimer && receptionTimer->isScheduled())
+           abortReception(receptionTimer);
     completeRadioModeSwitch(RADIO_MODE_OFF);
     return PhysicalLayerBase::handleNodeShutdown(doneCallback);
 }
@@ -329,6 +331,8 @@ void Radio::handleNodeCrash()
     cancelEvent(switchTimer);
     if (transmissionTimer->isScheduled())
         abortTransmission();
+    if (receptionTimer && receptionTimer->isScheduled())
+           abortReception(receptionTimer);
     completeRadioModeSwitch(RADIO_MODE_OFF);
     PhysicalLayerBase::handleNodeCrash();
 }
