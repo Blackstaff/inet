@@ -24,6 +24,8 @@
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+
 namespace inet {
 
 namespace physicallayer {
@@ -591,7 +593,12 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
     communicationCache->removeCachedReceptionResult(radio, transmission);
     cPacket *macFrame = const_cast<cPacket *>(result->getMacFrame()->dup());
-    macFrame->setControlInfo(const_cast<ReceptionIndication *>(result->getIndication()));
+    ReceptionIndication *indication = const_cast<ReceptionIndication *>(result->getIndication());
+    if (strcmp(getSubmodule("analogModel")->getClassName(), "inet::physicallayer::ScalarAnalogModel") == 0) {
+        const ScalarReception *reception = dynamic_cast<const ScalarReception *>(result->getReception());
+        indication->setRSSI(reception->getPower());
+    }
+    macFrame->setControlInfo(indication);
     delete result;
     return macFrame;
 }

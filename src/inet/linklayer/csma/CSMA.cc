@@ -938,8 +938,10 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
 
 cPacket *CSMA::decapsMsg(CSMAFrame *macPkt)
 {
+    ReceptionIndication *cInfo = check_and_cast<ReceptionIndication *>(macPkt->removeControlInfo());
+    double rssi = cInfo->getRSSI().get();
     cPacket *msg = macPkt->decapsulate();
-    setUpControlInfo(msg, macPkt->getSrcAddr());
+    setUpControlInfo(msg, macPkt->getSrcAddr(), rssi);
 
     return msg;
 }
@@ -947,10 +949,11 @@ cPacket *CSMA::decapsMsg(CSMAFrame *macPkt)
 /**
  * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
  */
-cObject *CSMA::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr)
+cObject *CSMA::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr, double rssi)
 {
     SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
+    cCtrlInfo->setRssi(rssi);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
