@@ -807,6 +807,39 @@ simtime_t CSMA::scheduleBackoff()
     return backoffTime + simTime();
 }
 
+bool CSMA::handleNodeStart(IDoneCallback *doneCallback)
+{
+    macState = IDLE_1;
+    return true;
+}
+
+bool CSMA::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+    macState = IDLE_1;
+    for (auto & elem : macQueue) {
+        delete (elem);
+    }
+    flushQueue();
+    return true;
+}
+
+void CSMA::handleNodeCrash()
+{
+    cancelEvent(backoffTimer);
+    cancelEvent(ccaTimer);
+    cancelEvent(sifsTimer);
+    cancelEvent(rxAckTimer);
+    macState = IDLE_1;
+    for (auto & elem : macQueue) {
+        delete (elem);
+    }
+    clearQueue();
+}
+
 /*
  * Binds timers to events and executes FSM.
  */

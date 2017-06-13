@@ -317,6 +317,10 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     void attachSignal(CSMAFrame *mac, simtime_t_cref startTime);
     void manageMissingAck(t_mac_event event, cMessage *msg);
     void startTimer(t_mac_timer timer);
+	
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
     virtual simtime_t scheduleBackoff();
 
