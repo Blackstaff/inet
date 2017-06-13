@@ -27,13 +27,14 @@
 #include "inet/applications/generic/IPvXTrafSink.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/applications/base/ApplicationBase.h"
 
 namespace inet {
 
 /**
  * IP traffic generator application. See NED for more info.
  */
-class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
+class INET_API IPvXTrafGen : public ApplicationBase
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -69,13 +70,15 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void startApp();
 
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     IPvXTrafGen();

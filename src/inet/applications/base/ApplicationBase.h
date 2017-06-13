@@ -20,6 +20,7 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/applications/base/ApplicationBase.h"
 
 namespace inet {
 

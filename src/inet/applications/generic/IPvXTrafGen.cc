@@ -43,7 +43,7 @@ IPvXTrafGen::~IPvXTrafGen()
 
 void IPvXTrafGen::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
@@ -70,6 +70,7 @@ void IPvXTrafGen::initialize(int stage)
         timer = new cMessage("sendTimer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        setOperational(isOperational);
 
         if (isNodeUp())
             startApp();
@@ -82,7 +83,7 @@ void IPvXTrafGen::startApp()
         scheduleNextPacket(-1);
 }
 
-void IPvXTrafGen::handleMessage(cMessage *msg)
+void IPvXTrafGen::handleMessageWhenUp(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
@@ -118,24 +119,21 @@ void IPvXTrafGen::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool IPvXTrafGen::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            startApp();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    startApp();
     return true;
+}
+
+bool IPvXTrafGen::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    cancelNextPacket();
+    return true;
+}
+
+void IPvXTrafGen::handleNodeCrash()
+{
+    cancelNextPacket();
 }
 
 void IPvXTrafGen::scheduleNextPacket(simtime_t previous)
